@@ -5,11 +5,8 @@ A comprehensive Java library for extracting structured data from Machine Readabl
 ## Features
 
 - **MRZ Data Extraction**: Extract structured data from TD1 (ID cards), TD2, and TD3 (passports) formats
-- **Advanced Image Preprocessing**: OpenCV-based image enhancement optimized for MRZ processing
-- **Multi-language Support**: Support for multiple languages and character sets
+- **Lightweight Tesseract Integration**: Uses the system `tesseract` binary to avoid heavy dependencies
 - **Comprehensive Validation**: MRZ checksum validation and data integrity checks
-- **Batch Processing**: Process multiple documents efficiently
-- **Debug Mode**: Detailed debugging with intermediate image and text output
 
 ## Supported Document Types
 
@@ -23,8 +20,8 @@ A comprehensive Java library for extracting structured data from Machine Readabl
 ### Basic Usage
 
 ```java
-import mz.nedbank.ocr.core.ocr.OcrProcessor;
-import mz.nedbank.ocr.model.ocr.IdentityDocument;
+import mz.nedbank.ocr.core.OcrProcessor;
+import mz.nedbank.ocr.model.IdentityDocument;
 
 // Initialize processor
 OcrProcessor processor = new OcrProcessor();
@@ -40,39 +37,6 @@ System.out.println("Nationality: " + document.getNationality());
 System.out.println("Date of Birth: " + document.getDateOfBirth());
 System.out.println("Expiration Date: " + document.getExpirationDate());
 System.out.println("Document Type: " + document.getDocumentType());
-```
-
-### Advanced Configuration
-
-```java
-// Configure preprocessing for better accuracy
-ImagePreprocessor.PreprocessingConfig config = new ImagePreprocessor.PreprocessingConfig();
-config.setScaleFactor(3.0);           // Higher scaling for small MRZ text
-config.setEnableDenoising(true);      // Remove image noise
-config.setEnableDeskewing(true);      // Correct document rotation
-processor.setPreprocessingConfig(config);
-
-// Enable debug mode
-processor.setDebugMode(true);
-processor.setDebugOutputDir("debug_output");
-
-// Set language for OCR
-processor.setLanguage("eng");
-```
-
-### Batch Processing
-
-```java
-File[] documentFiles = new File("documents").listFiles();
-IdentityDocument[] results = processor.processIdentityDocumentBatch(documentFiles);
-
-for (IdentityDocument doc : results) {
-    if (doc.isValid()) {
-        System.out.println("Processed: " + doc.getFullName());
-    } else {
-        System.out.println("Invalid document: " + doc.getValidationErrors());
-    }
-}
 ```
 
 ## Installation
@@ -180,7 +144,6 @@ if (document.isValid()) {
 
 - **Typical Processing Time**: 2-5 seconds per document
 - **Memory Usage**: ~50MB base + 10-50MB per document
-- **Batch Processing**: 1-3 seconds per document (after warmup)
 - **Recommended Heap**: 1-4GB for production use
 
 ## Troubleshooting
@@ -189,22 +152,9 @@ if (document.isValid()) {
 
 1. **Tesseract not found**: Ensure Tesseract is installed and in PATH
 2. **Poor OCR accuracy**: Try adjusting preprocessing settings
-3. **Memory issues**: Increase JVM heap size for batch processing
+3. **Memory issues**: Increase JVM heap size if processing large images
 4. **Language errors**: Install required Tesseract language packs
 
-### Debug Mode
-
-Enable debug mode to save intermediate processing results:
-
-```java
-processor.setDebugMode(true);
-processor.setDebugOutputDir("debug");
-```
-
-This will save:
-- Preprocessed images
-- Raw OCR text output
-- Processing logs
 
 ## Contributing
 

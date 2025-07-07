@@ -2,6 +2,11 @@
 
 This guide helps resolve common issues when using the OCR Java Library.
 
+> **Note**: The current lightweight version relies solely on the system `tesseract`
+> command and does not include advanced preprocessing or debug features
+> mentioned in earlier revisions. Sections referring to `ImagePreprocessor` or
+> debug configuration may not apply.
+
 ## Table of Contents
 
 1. [Installation Issues](#installation-issues)
