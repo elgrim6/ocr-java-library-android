@@ -12,7 +12,9 @@ public class PassportExample {
 
             // Process a passport image
             File passportImage = new File("C:\\Users\\dysha\\Downloads\\ocr-identity-documents-library\\ocr-java-library\\src\\test\\resources\\sample_passport_mrz.png");
-            IdentityDocument document = processor.processIdentityDocument(passportImage);
+        OcrProcessor.ProcessingResult<IdentityDocument> result =
+                processor.processIdentityDocument(passportImage);
+        IdentityDocument document = result.getResult();
 
             // Display extracted information
             if (document.isValid()) {

@@ -216,7 +216,9 @@ public class IdentityDocumentProcessorTest {
     @Ignore
     public void testProcessorConfiguration() {
         // Test MRZ-optimized configuration
-        assertNotNull("Preprocessing config should not be null", processor.getPreprocessingConfig());
+        // API no longer exposes preprocessing configuration directly.
+        // Ensure processor statistics object is available instead.
+        assertNotNull("Processing statistics should not be null", processor.getProcessingStatistics());
         
         // Test debug mode
         processor.setDebugMode(true);
@@ -236,7 +238,8 @@ public class IdentityDocumentProcessorTest {
     @Ignore
     public void testBatchProcessing() {
         // Test with empty array
-        IdentityDocument[] results = processor.processIdentityDocumentBatch(new File[0]);
+        OcrProcessor.ProcessingResult<IdentityDocument>[] results =
+                processor.processIdentityDocumentBatch(new File[0]);
         assertNotNull("Results should not be null", results);
         assertEquals("Results should be empty", 0, results.length);
         
@@ -257,8 +260,9 @@ public class IdentityDocumentProcessorTest {
             assertTrue("Should fail due to file not found", e.getMessage().contains("does not exist"));
         }
         
-        // Test deprecated batch processing
-        processor.processInvoiceBatch(new File[0]);
+        // Deprecated batch processing method removed from API. Ensure
+        // current batch method can be invoked without errors.
+        processor.processIdentityDocumentBatch(new File[0]);
     }
     
     @Test
