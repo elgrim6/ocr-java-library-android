@@ -2,6 +2,8 @@
 
 This document provides comprehensive examples for using the OCR Java Library to process identity documents and extract MRZ data.
 
+> **Note**: These examples were written for earlier versions with advanced preprocessing and configuration. The current lightweight implementation only provides basic MRZ extraction.
+
 ## Table of Contents
 
 1. [Basic Examples](#basic-examples)

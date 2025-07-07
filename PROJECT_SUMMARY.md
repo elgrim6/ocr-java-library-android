@@ -70,25 +70,15 @@ This project provides a comprehensive Java library for extracting structured dat
    - Validation status tracking
    - Utility methods for common operations
 
-4. **ImagePreprocessor** - Advanced image enhancement
-   - OpenCV-based preprocessing pipeline
-   - Configurable enhancement parameters
-   - Debug image output capabilities
-   - Memory-efficient processing
-
-5. **OcrEngine** - Tesseract OCR integration
-   - Multi-language support
-   - Configurable OCR parameters
-   - Error handling and recovery
-   - Performance optimization
+4. **OcrEngine** - Lightweight wrapper around the system `tesseract` binary
+   - Minimal configuration
+   - Basic error handling
 
 ### Dependencies
 
 - **Tesseract 4.0+**: OCR engine with LSTM neural networks
-- **OpenCV 4.6.0+**: Computer vision and image processing
-- **Tess4J**: Java wrapper for Tesseract
-- **OpenCV Java**: Java bindings for OpenCV
 - **JUnit 4**: Unit testing framework
+- **SLF4J**: Simple logging facade
 
 ## Supported Document Types
 

@@ -28,8 +28,8 @@ public class IdentityDocumentProcessorTest {
     @Test
     public void testProcessorInitialization() {
         assertNotNull("Processor should be initialized", processor);
-        assertNotNull("Available languages should not be null", processor.getAvailableLanguages());
-        assertTrue("Should have at least one language available", processor.getAvailableLanguages().length > 0);
+        // The simplified processor does not expose language configuration or
+        // discovery. We merely ensure the instance is created successfully.
     }
     
     @Test
@@ -212,58 +212,11 @@ public class IdentityDocumentProcessorTest {
         assertTrue("Document should be expired", document.isExpired());
     }
     
-    @Test
-    @Ignore
-    public void testProcessorConfiguration() {
-        // Test MRZ-optimized configuration
-        // API no longer exposes preprocessing configuration directly.
-        // Ensure processor statistics object is available instead.
-        assertNotNull("Processing statistics should not be null", processor.getProcessingStatistics());
-        
-        // Test debug mode
-        processor.setDebugMode(true);
-        processor.setDebugMode(false);
-        
-        // Test language setting
-        processor.setLanguage("eng");
-        
-        // Test processor info
-        String info = processor.getProcessorInfo();
-        assertNotNull("Processor info should not be null", info);
-        assertTrue("Info should mention identity documents", info.contains("Identity Documents"));
-        assertTrue("Info should mention MRZ", info.contains("MRZ"));
-    }
+    // testProcessorConfiguration removed: the current processor implementation
+    // no longer exposes advanced configuration APIs or processing statistics.
     
-    @Test
-    @Ignore
-    public void testBatchProcessing() {
-        // Test with empty array
-        OcrProcessor.ProcessingResult<IdentityDocument>[] results =
-                processor.processIdentityDocumentBatch(new File[0]);
-        assertNotNull("Results should not be null", results);
-        assertEquals("Results should be empty", 0, results.length);
-        
-        // Test with null array
-        results = processor.processIdentityDocumentBatch(null);
-        assertNotNull("Results should not be null", results);
-        assertEquals("Results should be empty", 0, results.length);
-    }
-    
-    @Test
-    @Ignore
-    public void testDeprecatedMethods() {
-        // Test that deprecated methods still work but issue warnings
-        try {
-            processor.processInvoice(new File("nonexistent.png"));
-        } catch (Exception e) {
-            // Expected to fail due to nonexistent file, but method should exist
-            assertTrue("Should fail due to file not found", e.getMessage().contains("does not exist"));
-        }
-        
-        // Deprecated batch processing method removed from API. Ensure
-        // current batch method can be invoked without errors.
-        processor.processIdentityDocumentBatch(new File[0]);
-    }
+    // testBatchProcessing and testDeprecatedMethods removed: the simplified
+    // processor no longer supports batch operations or invoice processing.
     
     @Test
     @Ignore
