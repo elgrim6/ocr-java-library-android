@@ -19,7 +19,7 @@ public class DebugMrzTest {
     @Test
     public void debugTD3Extraction() {
         // Test TD3 format
-        String sampleMrz = "PPMOZMENDES<<PAULA<<FRANCISCA<<GLORIA<<<<<<<\n" +
+        String sampleMrz = "PPMOZMENDES<<PAULA<FRANCISCA<GLORIA<<<<<<<<<\n" +
                 "SAMPLE0240MOZ7012141F150317399999939<<<<<<68\n";
         
         System.out.println("=== DEBUG TD3 EXTRACTION ===");

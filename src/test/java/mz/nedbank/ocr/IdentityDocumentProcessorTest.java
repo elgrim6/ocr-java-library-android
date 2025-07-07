@@ -35,8 +35,8 @@ public class IdentityDocumentProcessorTest {
     @Test
     public void testMrzExtractorTD3Passport() {
         // Sample TD3 MRZ data (passport format)
-        String sampleMrz = "PPMOZMENDES<<PAULA<<FRANCISCA<<GLORIA<<<<<<<\n" +
-                        "SAMPLE0240MOZ7012141F150317399999939<<<<<<68\n";
+        String sampleMrz = "PNMOZREFO<JUNIOR<<EUGENIO<CASTIGO<<<<<<<<<<<\n" +
+                        "AB08647664MOZ0212229M2511085110201453113P<98\n";
         
         IdentityDocument document = extractor.extract(sampleMrz);
         
@@ -44,20 +44,48 @@ public class IdentityDocumentProcessorTest {
         assertEquals("Document type should be PASSPORT", IdentityDocument.DocumentType.PASSPORT, document.getDocumentType());
         assertEquals("Issuing country should be USA", "MOZ", document.getIssuingCountry());
         assertEquals("Nationality should be USA", "MOZ", document.getNationality());
-        assertEquals("Surname should be DOE", "MENDES", document.getSurname());
-        assertEquals("Given names should be JOHN", "PAULA", document.getGivenNames());
-        assertEquals("Document number should be 123456789", "SAMPLE024", document.getDocumentNumber());
-        assertEquals("Gender should be MALE", IdentityDocument.Gender.FEMALE, document.getGender());
+        assertEquals("Surname should be DOE", "REFO JUNIOR", document.getSurname());
+        assertEquals("Given names should be PAULA FRANCISCA GLORIA", "EUGENIO CASTIGO", document.getGivenNames());
+        assertEquals("Document number should be 123456789", "AB0864766", document.getDocumentNumber());
+        assertEquals("Gender should be MALE", IdentityDocument.Gender.MALE, document.getGender());
         assertEquals("MRZ format should be TD3", IdentityDocument.MrzFormat.TD3, document.getMrzFormat());
         
         // Test date parsing
         assertNotNull("Date of birth should not be null", document.getDateOfBirth());
-        assertEquals("Birth year should be 1980", 1970, document.getDateOfBirth().getYear());
-        assertEquals("Birth month should be 1", 12, document.getDateOfBirth().getMonthValue());
-        assertEquals("Birth day should be 14", 14, document.getDateOfBirth().getDayOfMonth());
+        assertEquals("Birth year should be 1980", 2002, document.getDateOfBirth().getYear());
+        assertEquals("Birth month should be 12", 12, document.getDateOfBirth().getMonthValue());
+        assertEquals("Birth day should be 22", 22, document.getDateOfBirth().getDayOfMonth());
         
         assertNotNull("Expiration date should not be null", document.getExpirationDate());
-        assertEquals("Expiration year should be 2025", 2015, document.getExpirationDate().getYear());
+        assertEquals("Expiration year should be 2025", 2025, document.getExpirationDate().getYear());
+    }
+
+    @Test
+    public void testMrzExtractorOCRTD3Passport() {
+        // Sample TD3 MRZ data (passport format)
+        String sampleMrz = "PNMOZREFO<JUNIOR<<EUGENIO<CASTIGO<<<<<<<<<<<\n" +
+                "AB08647664MOZ0212229M2511085110201453113P<98\n";
+
+        IdentityDocument document = extractor.extract(sampleMrz);
+
+        assertNotNull("Document should not be null", document);
+        assertEquals("Document type should be PASSPORT", IdentityDocument.DocumentType.PASSPORT, document.getDocumentType());
+        assertEquals("Issuing country should be USA", "MOZ", document.getIssuingCountry());
+        assertEquals("Nationality should be USA", "MOZ", document.getNationality());
+        assertEquals("Surname should be DOE", "REFO JUNIOR", document.getSurname());
+        assertEquals("Given names should be PAULA FRANCISCA GLORIA", "EUGENIO CASTIGO", document.getGivenNames());
+        assertEquals("Document number should be 123456789", "AB0864766", document.getDocumentNumber());
+        assertEquals("Gender should be MALE", IdentityDocument.Gender.MALE, document.getGender());
+        assertEquals("MRZ format should be TD3", IdentityDocument.MrzFormat.TD3, document.getMrzFormat());
+
+        // Test date parsing
+        assertNotNull("Date of birth should not be null", document.getDateOfBirth());
+        assertEquals("Birth year should be 1980", 2002, document.getDateOfBirth().getYear());
+        assertEquals("Birth month should be 12", 12, document.getDateOfBirth().getMonthValue());
+        assertEquals("Birth day should be 22", 22, document.getDateOfBirth().getDayOfMonth());
+
+        assertNotNull("Expiration date should not be null", document.getExpirationDate());
+        assertEquals("Expiration year should be 2025", 2025, document.getExpirationDate().getYear());
     }
     
     @Test
