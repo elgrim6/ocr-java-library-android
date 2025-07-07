@@ -11,7 +11,8 @@ public class PassportExample {
             OcrProcessor processor = new OcrProcessor();
 
             // Process a passport image
-            File passportImage = new File("C:\\Users\\dysha\\Downloads\\ocr-identity-documents-library\\ocr-java-library\\src\\test\\resources\\sample_passport_mrz.png");
+            // Use a relative path so the example works across environments
+            File passportImage = new File("src/test/resources/sample_passport_mrz.png");
         OcrProcessor.ProcessingResult<IdentityDocument> result =
                 processor.processIdentityDocument(passportImage);
         IdentityDocument document = result.getResult();
