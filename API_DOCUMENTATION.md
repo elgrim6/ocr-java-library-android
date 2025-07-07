@@ -2,7 +2,7 @@
 
 ## Overview
 
-This library provides comprehensive OCR capabilities specifically designed for processing Machine Readable Zones (MRZ) from identification documents such as passports, ID cards, and visas. The library combines advanced OpenCV image preprocessing with Tesseract OCR to achieve high accuracy in data extraction.
+This library provides OCR utilities focused on extracting data from Machine Readable Zones (MRZ) of passports and ID cards. It uses the system `tesseract` command for OCR and does not rely on heavy native dependencies.
 
 ## Core Classes
 
@@ -18,9 +18,9 @@ public OcrProcessor()
 Creates an OCR processor with default settings (English language).
 
 ```java
-public OcrProcessor(String tessDataPath, String language)
+public OcrProcessor(String language)
 ```
-Creates an OCR processor with custom Tesseract data path and language.
+Creates an OCR processor using the specified Tesseract language.
 
 **Parameters:**
 - `tessDataPath` - Path to tessdata directory (null for default)
@@ -75,56 +75,12 @@ public String extractTextRaw(File file) throws Exception
 ```
 Extracts raw OCR text from an image without preprocessing.
 
-#### Configuration Methods
+#### Configuration
 
-```java
-public void setPreprocessingConfig(ImagePreprocessor.PreprocessingConfig config)
-```
-Sets the image preprocessing configuration.
+The simplified API exposes only the constructors shown above. The processor
+invokes the system `tesseract` binary, so no additional configuration methods
+are provided.
 
-```java
-public ImagePreprocessor.PreprocessingConfig getPreprocessingConfig()
-```
-Gets the current preprocessing configuration.
-
-```java
-public void setLanguage(String language)
-```
-Sets the OCR language.
-
-```java
-public void setDebugMode(boolean debugMode)
-```
-Enables or disables debug mode for detailed output.
-
-```java
-public void setDebugOutputDir(String debugOutputDir)
-```
-Sets the directory for debug output files.
-
-```java
-public String[] getAvailableLanguages()
-```
-Returns array of available OCR languages.
-
-```java
-public String getProcessorInfo()
-```
-Returns processor configuration information.
-
-#### Deprecated Methods
-
-```java
-@Deprecated
-public InvoiceData processInvoice(File file) throws Exception
-```
-Legacy method for invoice processing. Use `processIdentityDocument()` instead.
-
-```java
-@Deprecated
-public InvoiceData[] processInvoiceBatch(File[] files)
-```
-Legacy method for batch invoice processing. Use `processIdentityDocumentBatch()` instead.
 
 ### IdentityDocument
 
@@ -290,87 +246,6 @@ String mrzText = "P<USADOE<<JOHN<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n123456789<USA80010
 IdentityDocument document = extractor.extract(mrzText);
 ```
 
-### ImagePreprocessor
-
-Provides image preprocessing capabilities optimized for MRZ processing.
-
-#### PreprocessingConfig
-
-Configuration class for image preprocessing options.
-
-```java
-public class PreprocessingConfig {
-    public double getScaleFactor()
-    public void setScaleFactor(double scaleFactor)
-    
-    public boolean isEnableDenoising()
-    public void setEnableDenoising(boolean enableDenoising)
-    
-    public boolean isEnableDeskewing()
-    public void setEnableDeskewing(boolean enableDeskewing)
-    
-    public boolean isEnableContrastEnhancement()
-    public void setEnableContrastEnhancement(boolean enableContrastEnhancement)
-    
-    public boolean isEnableMorphologicalOps()
-    public void setEnableMorphologicalOps(boolean enableMorphologicalOps)
-    
-    public int getBlurKernelSize()
-    public void setBlurKernelSize(int blurKernelSize)
-    
-    public int getMorphKernelSize()
-    public void setMorphKernelSize(int morphKernelSize)
-}
-```
-
-#### Static Methods
-
-```java
-public static Mat preprocess(File imageFile, PreprocessingConfig config) throws Exception
-```
-Preprocesses an image file with the given configuration.
-
-```java
-public static void saveDebugImage(Mat image, String outputPath)
-```
-Saves a debug image to the specified path.
-
-### OcrEngine
-
-Low-level OCR engine wrapper for Tesseract.
-
-#### Methods
-
-```java
-public String doOcr(File imageFile) throws TesseractException
-```
-Performs OCR on an image file.
-
-```java
-public String doOcr(Mat image) throws TesseractException
-```
-Performs OCR on an OpenCV Mat image.
-
-```java
-public void setLanguage(String language)
-```
-Sets the OCR language.
-
-```java
-public void setPageSegMode(int mode)
-```
-Sets the page segmentation mode.
-
-```java
-public void setOcrEngineMode(int mode)
-```
-Sets the OCR engine mode.
-
-```java
-public String[] getAvailableLanguages()
-```
-Returns available OCR languages.
-
 ## Usage Examples
 
 ### Basic Document Processing
@@ -393,46 +268,7 @@ if (passport.isValid()) {
 }
 ```
 
-### Advanced Configuration
 
-```java
-// Create custom preprocessing configuration
-ImagePreprocessor.PreprocessingConfig config = new ImagePreprocessor.PreprocessingConfig();
-config.setScaleFactor(3.0);              // Higher scaling for small text
-config.setEnableDenoising(true);         // Remove noise
-config.setEnableDeskewing(true);         // Correct rotation
-config.setEnableContrastEnhancement(true); // Improve contrast
-
-// Configure processor
-OcrProcessor processor = new OcrProcessor();
-processor.setPreprocessingConfig(config);
-processor.setDebugMode(true);
-processor.setDebugOutputDir("debug_output");
-processor.setLanguage("eng");
-
-// Process document
-IdentityDocument document = processor.processIdentityDocument(new File("id_card.jpg"));
-```
-
-### Batch Processing
-
-```java
-// Process multiple documents
-File documentsDir = new File("documents");
-File[] documentFiles = documentsDir.listFiles((dir, name) -> 
-    name.toLowerCase().endsWith(".jpg") || name.toLowerCase().endsWith(".png"));
-
-IdentityDocument[] results = processor.processIdentityDocumentBatch(documentFiles);
-
-// Process results
-for (int i = 0; i < results.length; i++) {
-    IdentityDocument doc = results[i];
-    System.out.printf("File: %s, Valid: %s, Name: %s%n", 
-                     documentFiles[i].getName(), 
-                     doc.isValid(), 
-                     doc.getFullName());
-}
-```
 
 ### Error Handling
 

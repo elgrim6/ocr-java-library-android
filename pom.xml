@@ -20,19 +20,6 @@
     </properties>
 
     <dependencies>
-        <!-- Tesseract OCR -->
-        <dependency>
-            <groupId>net.sourceforge.tess4j</groupId>
-            <artifactId>tess4j</artifactId>
-            <version>5.8.0</version>
-        </dependency>
-
-        <!-- OpenCV for image processing -->
-        <dependency>
-            <groupId>org.openpnp</groupId>
-            <artifactId>opencv</artifactId>
-            <version>4.6.0-0</version>
-        </dependency>
 
         <!-- JUnit for testing -->
         <dependency>
@@ -82,7 +69,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>mz.nedbank.ocr.core.ocr.OcrProcessor</mainClass>
+                            <mainClass>mz.nedbank.ocr.PassportExample</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
