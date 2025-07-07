@@ -59,8 +59,13 @@ public class OcrProcessor {
      */
     public ProcessingResult<IdentityDocument> processIdentityDocument(File image) {
         try {
+
+            // Allow overriding the tesseract binary via environment variable
+            String tesseractCmd = System.getenv().getOrDefault("TESSERACT_PATH", "tesseract");
+
             ProcessBuilder pb = new ProcessBuilder(
-                    "tesseract",
+                    tesseractCmd,
+
                     image.getAbsolutePath(),
                     "stdout",
                     "-l", language,
