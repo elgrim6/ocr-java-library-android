@@ -12,11 +12,13 @@ public class PassportExample {
 
             // Process a passport image
             // Use a relative path so the example works across environments
-            File passportImage = new File("src/test/resources/sample_passport_mrz.png");
+            File passportImage = new File("src/test/resources/sample_passport_mrz2.png");
+
         OcrProcessor.ProcessingResult<IdentityDocument> result =
                 processor.processIdentityDocument(passportImage);
-        IdentityDocument document = result.getResult();
 
+        IdentityDocument document = result.getResult();
+            System.out.println(document.getRawMrzText());
             // Display extracted information
             if (document.isValid()) {
                 System.out.println("=== Passport Information ===");
