@@ -5,6 +5,7 @@ A comprehensive Java library for extracting structured data from Machine Readabl
 ## Features
 
 - **MRZ Data Extraction**: Extract structured data from TD1 (ID cards), TD2, and TD3 (passports) formats
+- **Enhanced OpenCV Preprocessing**: Automatic contrast adjustment and sharpening before OCR
 - **Lightweight Tesseract Integration**: Uses the system `tesseract` binary to avoid heavy dependencies
 - **Comprehensive Validation**: MRZ checksum validation and data integrity checks
 
@@ -27,7 +28,8 @@ import mz.nedbank.ocr.model.IdentityDocument;
 OcrProcessor processor = new OcrProcessor();
 
 // Process identity document. Images are automatically preprocessed using
-// OpenCV before OCR is performed.
+// an enhanced OpenCV pipeline before OCR is performed.
+
 File documentImage = new File("passport.jpg");
 IdentityDocument document = processor.processIdentityDocument(documentImage);
 
@@ -86,6 +88,8 @@ running OCR. Key operations include:
 - **Contrast Enhancement**: Improve text visibility
 - **Morphological Operations**: Clean up character shapes
 - **Binarization**: Convert to optimal black/white format
+- **Adaptive Brightness**: Histogram-based contrast adjustment
+- **Sharpening**: Unsharp masking to highlight characters
 
 ### OCR Settings
 
