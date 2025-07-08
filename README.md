@@ -29,6 +29,7 @@ OcrProcessor processor = new OcrProcessor();
 
 // Process identity document. Images are automatically preprocessed using
 // an enhanced OpenCV pipeline before OCR is performed.
+
 File documentImage = new File("passport.jpg");
 IdentityDocument document = processor.processIdentityDocument(documentImage);
 

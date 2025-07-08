@@ -3,11 +3,13 @@ package mz.nedbank.ocr.core;
 import nu.pattern.OpenCV;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+
 import org.opencv.core.MatOfFloat;
 import org.opencv.core.MatOfInt;
 import org.opencv.core.Size;
 import org.opencv.core.Core;
 import org.opencv.core.Scalar;
+
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
