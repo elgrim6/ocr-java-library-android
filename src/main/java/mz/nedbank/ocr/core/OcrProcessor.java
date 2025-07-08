@@ -2,10 +2,12 @@ package mz.nedbank.ocr.core;
 
 import mz.nedbank.ocr.extractor.MrzDataExtractor;
 import mz.nedbank.ocr.model.IdentityDocument;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.io.IOException;
+
+import mz.nedbank.ocr.core.ImagePreprocessor;
 
 /**
  * Simplified OCR processor that invokes the system tesseract command
@@ -41,6 +43,7 @@ public class OcrProcessor {
     }
 
     private final MrzDataExtractor extractor = new MrzDataExtractor();
+    private final ImagePreprocessor preprocessor = new ImagePreprocessor();
     private final String language;
 
     /** Create a processor using English OCR. */
@@ -60,13 +63,23 @@ public class OcrProcessor {
     public ProcessingResult<IdentityDocument> processIdentityDocument(File image) {
         try {
 
+            // Preprocess image using OpenCV. If preprocessing fails, fall back to
+            // the original image.
+            File processed = image;
+            try {
+                processed = preprocessor.preprocess(image);
+            } catch (IOException e) {
+                // Preprocessing is optional; log to stderr and continue
+                System.err.println("Preprocessing failed: " + e.getMessage());
+            }
+
             // Allow overriding the tesseract binary via environment variable
             String tesseractCmd = System.getenv().getOrDefault("TESSERACT_PATH", "tesseract");
 
             ProcessBuilder pb = new ProcessBuilder(
                     tesseractCmd,
 
-                    image.getAbsolutePath(),
+                    processed.getAbsolutePath(),
                     "stdout",
                     "-l", language,
                     "--oem", "1",
@@ -80,6 +93,11 @@ public class OcrProcessor {
                 }
             }
             proc.waitFor();
+
+            // Remove temporary file
+            if (!processed.equals(image)) {
+                processed.delete();
+            }
 
             // Basic cleanup of OCR output. Some engines may prepend or append
             // stray characters which can prevent MRZ detection. We trim each
