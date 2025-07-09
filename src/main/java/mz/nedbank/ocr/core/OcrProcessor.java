@@ -2,10 +2,14 @@ package mz.nedbank.ocr.core;
 
 import mz.nedbank.ocr.extractor.MrzDataExtractor;
 import mz.nedbank.ocr.model.IdentityDocument;
+
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.io.IOException;
+
+import javax.imageio.ImageIO;
 
 import mz.nedbank.ocr.core.ImagePreprocessor;
 
@@ -65,13 +69,31 @@ public class OcrProcessor {
 
             // Preprocess image using OpenCV. If preprocessing fails, fall back to
             // the original image.
+            // Preprocess image using OpenCV. If preprocessing fails, fall back to
+            // the original image.
             File processed = image;
             try {
                 processed = preprocessor.preprocess(image);
+
+                // Save the processed image for inspection
+                BufferedImage bi = ImageIO.read(processed);
+                if (bi != null) {
+                    File outputfile = new File("processed_passport.png");
+                    ImageIO.write(bi, "png", outputfile);
+                    System.out.println("Processed image saved to " + outputfile.getAbsolutePath());
+                } else {
+                    System.err.println("ImageIO.read() returned null for processed image.");
+                }
+
             } catch (IOException e) {
                 // Preprocessing is optional; log to stderr and continue
                 System.err.println("Preprocessing failed: " + e.getMessage());
             }
+
+            /*} catch (IOException e) {
+                // Preprocessing is optional; log to stderr and continue
+                System.err.println("Preprocessing failed: " + e.getMessage());
+            }*/
 
             // Allow overriding the tesseract binary via environment variable
             String tesseractCmd = System.getenv().getOrDefault("TESSERACT_PATH", "tesseract");

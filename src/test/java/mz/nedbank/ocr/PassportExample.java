@@ -12,7 +12,7 @@ public class PassportExample {
 
             // Process a passport image
             // Use a relative path so the example works across environments
-            File passportImage = new File("src/test/resources/sample_passport_mrz2.png");
+            File passportImage = new File("src/test/resources/sample_id_card_mrz5.png");
 
         OcrProcessor.ProcessingResult<IdentityDocument> result =
                 processor.processIdentityDocument(passportImage);
