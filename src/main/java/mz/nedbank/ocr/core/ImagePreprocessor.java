@@ -1,6 +1,7 @@
 package mz.nedbank.ocr.core;
 
 import nu.pattern.OpenCV;
+import org.opencv.android.OpenCVLoader;
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
@@ -20,7 +21,13 @@ public class ImagePreprocessor {
         try {
             OpenCV.loadLocally();
         } catch (UnsatisfiedLinkError e) {
-            System.err.println("Failed to load OpenCV library: " + e.getMessage());
+            try {
+                if (!OpenCVLoader.initDebug()) {
+                    System.err.println("Failed to load OpenCV library: " + e.getMessage());
+                }
+            } catch (NoClassDefFoundError ignored) {
+                System.err.println("OpenCV not available: " + e.getMessage());
+            }
         }
     }
 
