@@ -75,6 +75,16 @@ cd ocr-java-library
 mvn clean install
 ```
 
+### Android/Gradle Setup
+
+This project can also be used as an Android library. Clone the repository and build with Gradle:
+
+```bash
+git clone <repository-url>
+cd ocr-java-library
+./gradlew assemble
+```
+
 ## Configuration
 
 ### Preprocessing Options

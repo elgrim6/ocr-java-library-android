@@ -61,6 +61,11 @@ temp_ocr_image_*.png
 # Test output
 test-debug/
 
+# Gradle build output
+.gradle/
+build/
+gradle/wrapper/gradle-wrapper.jar
+
 # Tessdata (if downloaded separately)
 tessdata/*.traineddata
 
