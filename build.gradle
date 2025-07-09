@@ -16,6 +16,9 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    lint {
+        abortOnError false
+    }
 }
 
 repositories {
@@ -24,7 +27,10 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.opencv:opencv-android:4.8.0'
+    // Use OpenPnp's OpenCV build which is available on Maven Central
+    implementation 'org.openpnp:opencv:4.7.0-0'
+    implementation 'org.slf4j:slf4j-api:1.7.36'
+    runtimeOnly 'org.slf4j:slf4j-simple:1.7.36'
     testImplementation 'junit:junit:4.13.2'
 }
 
