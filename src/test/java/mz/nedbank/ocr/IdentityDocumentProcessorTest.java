@@ -290,7 +290,7 @@ public class IdentityDocumentProcessorTest {
             System.out.println(document.getRawMrzText());
             // Display extracted information
             if (document.isValid()) {
-                System.out.println("=== Passport Information ===");
+                System.out.println("=== ID Card Information ===");
                 System.out.println("Full Name: " + document.getFullName());
                 System.out.println("Document Number: " + document.getDocumentNumber());
                 System.out.println("Nationality: " + document.getNationality());
