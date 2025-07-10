@@ -1,10 +1,13 @@
 package mz.nedbank.ocr;
 
+import org.junit.Test;
+
 import mz.nedbank.ocr.core.OcrProcessor;
 import mz.nedbank.ocr.model.IdentityDocument;
 import java.io.File;
 
 public class PassportExample {
+    @Test
     public static void main(String[] args) {
         try {
             // Initialize the OCR processor

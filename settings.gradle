@@ -6,3 +6,5 @@ pluginManagement {
     }
 }
 rootProject.name = 'ocr-android-library'
+
+include ':opencv'

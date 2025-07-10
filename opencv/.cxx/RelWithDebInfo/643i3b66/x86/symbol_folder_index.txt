@@ -1,0 +1,1 @@
+C:\Users\dysha\StudioProjects\ocr-java-library-android\opencv\build\intermediates\cxx\RelWithDebInfo\643i3b66\obj\x86

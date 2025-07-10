@@ -1,0 +1,1 @@
+C:\Users\dysha\AndroidStudioProjects\OpenCVIntegration\opencv\build\intermediates\cxx\RelWithDebInfo\1x0266n4\obj\x86
