@@ -49,51 +49,68 @@ public class MrzImageCropper {
     }
 
     private Rect detectMrz(Mat src) {
+        // Convert to grayscale and remove small noise
         Mat gray = new Mat();
         Imgproc.cvtColor(src, gray, Imgproc.COLOR_BGR2GRAY);
         Imgproc.GaussianBlur(gray, gray, new Size(3, 3), 0);
 
+        // Use a blackhat operation to emphasize dark text on a light background
+        Mat blackhat = new Mat();
+        Mat rectKernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(13, 5));
+        Imgproc.morphologyEx(gray, blackhat, Imgproc.MORPH_BLACKHAT, rectKernel);
+
+        // Compute the gradient in the x direction and enhance it
         Mat gradX = new Mat();
-        Imgproc.Sobel(gray, gradX, CvType.CV_32F, 1, 0, -1);
+        Imgproc.Sobel(blackhat, gradX, CvType.CV_32F, 1, 0, -1);
         Core.convertScaleAbs(gradX, gradX);
+        Imgproc.morphologyEx(gradX, gradX, Imgproc.MORPH_CLOSE, rectKernel);
 
-        Mat blurred = new Mat();
-        Imgproc.GaussianBlur(gradX, blurred, new Size(3, 3), 0);
-
+        // Threshold the gradient image to get binary regions of text
         Mat thresh = new Mat();
-        Imgproc.threshold(blurred, thresh, 0, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
+        Imgproc.threshold(gradX, thresh, 0, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
 
-        Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(25, 5));
-        Imgproc.morphologyEx(thresh, thresh, Imgproc.MORPH_CLOSE, kernel);
+        // Merge neighboring text lines to form one large block
+        Mat sqKernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(21, 21));
+        Imgproc.morphologyEx(thresh, thresh, Imgproc.MORPH_CLOSE, sqKernel);
 
         List<MatOfPoint> contours = new ArrayList<>();
         Mat hierarchy = new Mat();
         Imgproc.findContours(thresh, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
-        Rect best = null;
-        double bestArea = 0;
+        int x1 = src.cols(), y1 = src.rows(), x2 = 0, y2 = 0;
         for (MatOfPoint contour : contours) {
             Rect rect = Imgproc.boundingRect(contour);
             double ratio = rect.width / (double) rect.height;
-            double area = rect.area();
-            if (ratio > 5.0 && area > bestArea) {
-                best = rect;
-                bestArea = area;
+            if (ratio > 4.0 && rect.height > src.rows() * 0.05) {
+                x1 = Math.min(x1, rect.x);
+                y1 = Math.min(y1, rect.y);
+                x2 = Math.max(x2, rect.x + rect.width);
+                y2 = Math.max(y2, rect.y + rect.height);
             }
         }
 
         gray.release();
+        blackhat.release();
         gradX.release();
-        blurred.release();
         thresh.release();
-        kernel.release();
+        rectKernel.release();
+        sqKernel.release();
         hierarchy.release();
 
-        if (best == null) {
-            // fallback to bottom 30% of the image
-            int y = (int) (src.rows() * 0.7);
+        if (x2 <= x1 || y2 <= y1) {
+            // fallback to bottom 25% of the image when detection fails
+            int y = (int) (src.rows() * 0.75);
             return new Rect(0, y, src.cols(), src.rows() - y);
         }
-        return best;
+
+        // Add a small margin around the detected block
+        int marginY = (int) (src.rows() * 0.02);
+        int marginX = (int) (src.cols() * 0.02);
+        x1 = Math.max(0, x1 - marginX);
+        y1 = Math.max(0, y1 - marginY);
+        x2 = Math.min(src.cols(), x2 + marginX);
+        y2 = Math.min(src.rows(), y2 + marginY);
+
+        return new Rect(x1, y1, x2 - x1, y2 - y1);
     }
 }
