@@ -10,6 +10,7 @@ import java.io.IOException;
 
 
 import mz.nedbank.ocr.core.ImagePreprocessor;
+import mz.nedbank.ocr.core.MrzImageCropper;
 
 /**
  * Simplified OCR processor that invokes the system tesseract command
@@ -46,6 +47,7 @@ public class OcrProcessor {
 
     private final MrzDataExtractor extractor = new MrzDataExtractor();
     private final ImagePreprocessor preprocessor = new ImagePreprocessor();
+    private final MrzImageCropper cropper = new MrzImageCropper();
     private final String language;
 
     /** Create a processor using English OCR. */
@@ -64,11 +66,19 @@ public class OcrProcessor {
      */
     public ProcessingResult<IdentityDocument> processIdentityDocument(File image) {
         try {
-            // Preprocess image using OpenCV. If preprocessing fails, fall back to
-            // the original image. The processed file path can be inspected on Android.
-            File processed = image;
+            // First crop the MRZ region if possible
+            File cropped = image;
             try {
-                processed = preprocessor.preprocess(image);
+                cropped = cropper.crop(image);
+            } catch (IOException e) {
+                System.err.println("MRZ cropping failed: " + e.getMessage());
+            }
+
+            // Preprocess image using OpenCV. If preprocessing fails, fall back to
+            // the cropped (or original) image. The processed file path can be inspected on Android.
+            File processed = cropped;
+            try {
+                processed = preprocessor.preprocess(cropped);
             } catch (IOException e) {
                 // Preprocessing is optional; log to stderr and continue
                 System.err.println("Preprocessing failed: " + e.getMessage());
@@ -95,9 +105,12 @@ public class OcrProcessor {
             }
             proc.waitFor();
 
-            // Remove temporary file
-            if (!processed.equals(image)) {
+            // Remove temporary files
+            if (!processed.equals(cropped)) {
                 processed.delete();
+            }
+            if (!cropped.equals(image)) {
+                cropped.delete();
             }
 
             // Basic cleanup of OCR output. Some engines may prepend or append
