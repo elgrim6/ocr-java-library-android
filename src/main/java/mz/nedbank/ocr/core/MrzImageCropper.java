@@ -70,22 +70,26 @@ public class MrzImageCropper {
         Imgproc.threshold(gradX, thresh, 0, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
 
         // Merge neighboring text lines to form one large block
-        Mat sqKernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(21, 21));
-        Imgproc.morphologyEx(thresh, thresh, Imgproc.MORPH_CLOSE, sqKernel);
+        Mat closeKernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(25, 5));
+        Imgproc.morphologyEx(thresh, thresh, Imgproc.MORPH_CLOSE, closeKernel);
+        Imgproc.dilate(thresh, thresh, closeKernel);
+        Imgproc.erode(thresh, thresh, closeKernel);
 
         List<MatOfPoint> contours = new ArrayList<>();
         Mat hierarchy = new Mat();
         Imgproc.findContours(thresh, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
-        int x1 = src.cols(), y1 = src.rows(), x2 = 0, y2 = 0;
+        int maxArea = 0;
+        Rect best = null;
         for (MatOfPoint contour : contours) {
             Rect rect = Imgproc.boundingRect(contour);
             double ratio = rect.width / (double) rect.height;
             if (ratio > 4.0 && rect.height > src.rows() * 0.05) {
-                x1 = Math.min(x1, rect.x);
-                y1 = Math.min(y1, rect.y);
-                x2 = Math.max(x2, rect.x + rect.width);
-                y2 = Math.max(y2, rect.y + rect.height);
+                int area = rect.width * rect.height;
+                if (area > maxArea) {
+                    maxArea = area;
+                    best = rect;
+                }
             }
         }
 
@@ -94,10 +98,10 @@ public class MrzImageCropper {
         gradX.release();
         thresh.release();
         rectKernel.release();
-        sqKernel.release();
+        closeKernel.release();
         hierarchy.release();
 
-        if (x2 <= x1 || y2 <= y1) {
+        if (best == null) {
             // fallback to bottom 25% of the image when detection fails
             int y = (int) (src.rows() * 0.75);
             return new Rect(0, y, src.cols(), src.rows() - y);
@@ -106,10 +110,10 @@ public class MrzImageCropper {
         // Add a small margin around the detected block
         int marginY = (int) (src.rows() * 0.02);
         int marginX = (int) (src.cols() * 0.02);
-        x1 = Math.max(0, x1 - marginX);
-        y1 = Math.max(0, y1 - marginY);
-        x2 = Math.min(src.cols(), x2 + marginX);
-        y2 = Math.min(src.rows(), y2 + marginY);
+        int x1 = Math.max(0, best.x - marginX);
+        int y1 = Math.max(0, best.y - marginY);
+        int x2 = Math.min(src.cols(), best.x + best.width + marginX);
+        int y2 = Math.min(src.rows(), best.y + best.height + marginY);
 
         return new Rect(x1, y1, x2 - x1, y2 - y1);
     }
