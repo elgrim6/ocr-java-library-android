@@ -64,6 +64,7 @@ test-debug/
 # Gradle build output
 .gradle/
 build/
+opencv/build
 gradle/wrapper/gradle-wrapper.jar
 
 # Tessdata (if downloaded separately)

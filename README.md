@@ -6,6 +6,7 @@ A comprehensive Java library for extracting structured data from Machine Readabl
 
 - **MRZ Data Extraction**: Extract structured data from TD1 (ID cards), TD2, and TD3 (passports) formats
 - **Enhanced OpenCV Preprocessing**: Automatic contrast adjustment and sharpening before OCR
+- **Automatic MRZ Cropping**: Accurately detects and crops the complete machine readable zone prior to processing
 - **Lightweight Tesseract Integration**: Uses the system `tesseract` binary to avoid heavy dependencies
 - **Comprehensive Validation**: MRZ checksum validation and data integrity checks
 
