@@ -1,3 +1,0 @@
-C:/Users/dysha/StudioProjects/ocr-java-library-android/opencv/.cxx/Debug/406u156x/x86/CMakeFiles/opencv_jni_shared.dir
-C:/Users/dysha/StudioProjects/ocr-java-library-android/opencv/.cxx/Debug/406u156x/x86/CMakeFiles/edit_cache.dir
-C:/Users/dysha/StudioProjects/ocr-java-library-android/opencv/.cxx/Debug/406u156x/x86/CMakeFiles/rebuild_cache.dir

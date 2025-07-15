@@ -74,3 +74,5 @@ tessdata/*.traineddata
 *.tmp
 *.temp
 
+#CXX files
+opencv/.cxx/

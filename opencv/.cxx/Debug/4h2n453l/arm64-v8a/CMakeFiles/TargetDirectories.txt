@@ -1,3 +1,0 @@
-C:/Users/dysha/StudioProjects/opencvfor_ImageClarityCheck/opencv/.cxx/Debug/4h2n453l/arm64-v8a/CMakeFiles/opencv_jni_shared.dir
-C:/Users/dysha/StudioProjects/opencvfor_ImageClarityCheck/opencv/.cxx/Debug/4h2n453l/arm64-v8a/CMakeFiles/edit_cache.dir
-C:/Users/dysha/StudioProjects/opencvfor_ImageClarityCheck/opencv/.cxx/Debug/4h2n453l/arm64-v8a/CMakeFiles/rebuild_cache.dir

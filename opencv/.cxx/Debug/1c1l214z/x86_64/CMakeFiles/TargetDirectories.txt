@@ -1,3 +1,0 @@
-C:/Users/dysha/AndroidStudioProjects/OpenCVIntegration/opencv/.cxx/Debug/1c1l214z/x86_64/CMakeFiles/opencv_jni_shared.dir
-C:/Users/dysha/AndroidStudioProjects/OpenCVIntegration/opencv/.cxx/Debug/1c1l214z/x86_64/CMakeFiles/edit_cache.dir
-C:/Users/dysha/AndroidStudioProjects/OpenCVIntegration/opencv/.cxx/Debug/1c1l214z/x86_64/CMakeFiles/rebuild_cache.dir
