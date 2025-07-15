@@ -20,6 +20,16 @@ android {
         abortOnError false
     }
 }
+publishing {
+    publications {
+        release(MavenPublication) {
+            groupId = 'mz.nedbank'
+            artifactId = 'ocr'
+            version = '1.0.0'
+        }
+    }
+}
+
 
 repositories {
     google()
