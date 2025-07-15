@@ -5,6 +5,7 @@ import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.CLAHE;
+import org.opencv.photo.Photo;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +25,7 @@ public class ImagePreprocessor {
         }
     }
 
-    private static final int TARGET_HEIGHT = 450; // Increased target height for better resolution
+    private static final int TARGET_HEIGHT = 400; // Increased target height for better resolution
 
     /**
      * Enhanced preprocessing with multiple strategies and fallback options.
@@ -49,26 +50,27 @@ public class ImagePreprocessor {
         Mat gray = new Mat();
         Imgproc.cvtColor(resized, gray, Imgproc.COLOR_BGR2GRAY);
 
-        // Step 3: Apply CLAHE for contrast enhancement
+        // Step 3: Apply Non-local Means Denoising for better noise reduction
+        Mat denoised = new Mat();
+        Photo.fastNlMeansDenoising(gray, denoised, 30, 7, 21); // Increased h parameter for stronger denoising
+
+        // Step 4: Apply CLAHE for contrast enhancement
         CLAHE clahe = Imgproc.createCLAHE(3.0, new Size(8, 8));
         Mat claheResult = new Mat();
-        clahe.apply(gray, claheResult);
-
-        // Step 4: Apply Median blur for noise reduction (effective for salt-and-pepper noise)
-        Mat blurred = new Mat();
-        Imgproc.medianBlur(claheResult, blurred, 5); // Using a 5x5 median filter
+        clahe.apply(denoised, claheResult);
 
         // Step 5: Deskew the image
-        Mat deskewed = deskewImage(blurred);
+        Mat deskewed = deskewImage(claheResult);
 
         // Step 6: Apply adaptive thresholding with adjusted parameters
         Mat binary = new Mat();
-        Imgproc.adaptiveThreshold(deskewed, binary, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 181, 35); // Increased block size and C value
+        // Experimenting with blockSize and C value for better results
+        Imgproc.adaptiveThreshold(deskewed, binary, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 199, 25);
 
         // Step 7: Apply morphological operations (optional, can be adjusted based on results)
-        Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3, 3)); // Increased kernel size
+        Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(2, 2)); // Adjusted kernel size
         Imgproc.morphologyEx(binary, binary, Imgproc.MORPH_CLOSE, kernel);
-        Imgproc.morphologyEx(binary, binary, Imgproc.MORPH_OPEN, kernel); // Added opening operation
+        Imgproc.morphologyEx(binary, binary, Imgproc.MORPH_OPEN, kernel);
 
         File temp = File.createTempFile("ocr_processed_", ".png");
         Imgcodecs.imwrite(temp.getAbsolutePath(), binary);
@@ -77,8 +79,8 @@ public class ImagePreprocessor {
         src.release();
         resized.release();
         gray.release();
+        denoised.release();
         claheResult.release();
-        blurred.release();
         deskewed.release();
         binary.release();
 
@@ -101,7 +103,8 @@ public class ImagePreprocessor {
                 double[] line = lines.get(i, 0);
                 double currentAngle = Math.toDegrees(Math.atan2(line[3] - line[1], line[2] - line[0]));
 
-                if (Math.abs(currentAngle) < 45) { // Consider lines that are mostly horizontal
+                // Filter out near-vertical lines and lines with extreme angles
+                if (Math.abs(currentAngle) < 45 && Math.abs(currentAngle) > 0.5) { // Only consider angles significant enough for deskewing
                     totalAngle += currentAngle;
                     lineCount++;
                 }
@@ -125,20 +128,4 @@ public class ImagePreprocessor {
 
         return rotated;
     }
-
-    // Removed unused methods for simplicity
-    private Mat enhancedPreprocessingPipeline(Mat src) { return null; }
-    private Mat resizeIfNeeded(Mat src) { return null; }
-    private Mat correctPerspectiveAndRotation(Mat src) { return null; }
-    private Mat findLargestRectangle(List<MatOfPoint> contours) { return null; }
-    private Mat correctPerspective(Mat src, MatOfPoint2f rectangle) { return null; }
-    private Point[] sortCorners(Point[] corners) { return null; }
-    private double distance(Point p1, Point p2) { return 0.0; }
-    private Mat correctRotation(Mat src, Mat edges) { return null; }
-    private Mat enhanceContrastAdaptive(Mat src) { return null; }
-    private Mat sharpenImageAdvanced(Mat src) { return null; }
-    private Mat applyAdaptiveThreshold(Mat src) { return null; }
-    private Mat enhanceTextMorphology(Mat src) { return null; }
-    private Mat removeNoise(Mat src) { return null; }
-    private File basicPreprocess(Mat src, File input) throws IOException { return null; }
 }
