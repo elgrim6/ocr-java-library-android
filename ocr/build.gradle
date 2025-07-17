@@ -25,7 +25,7 @@ publishing {
         release(MavenPublication) {
             groupId = 'mz.nedbank'
             artifactId = 'ocr'
-            version = '1.0.0'
+            version = '1.1.4'
         }
     }
 }
