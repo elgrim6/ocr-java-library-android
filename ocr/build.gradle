@@ -1,0 +1,46 @@
+plugins {
+    id "com.android.library" version "8.1.1"
+    id "maven-publish"
+}
+
+android {
+    namespace 'mz.nedbank.ocr'
+    compileSdk 33
+    defaultConfig {
+        minSdk 21
+        targetSdk 33
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        consumerProguardFiles 'consumer-rules.pro'
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    lint {
+        abortOnError false
+    }
+}
+publishing {
+    publications {
+        release(MavenPublication) {
+            groupId = 'mz.nedbank'
+            artifactId = 'ocr'
+            version = '1.0.0'
+        }
+    }
+}
+
+
+repositories {
+    google()
+    mavenCentral()
+}
+
+dependencies {
+    // Use OpenPnp's OpenCV build which is available on Maven Central
+    implementation 'org.openpnp:opencv:4.7.0-0'
+    implementation 'org.slf4j:slf4j-api:1.7.36'
+    runtimeOnly 'org.slf4j:slf4j-simple:1.7.36'
+    testImplementation 'junit:junit:4.13.2'
+}
+
