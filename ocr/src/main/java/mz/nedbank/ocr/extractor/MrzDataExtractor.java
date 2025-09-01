@@ -1,5 +1,7 @@
 package mz.nedbank.ocr.extractor;
 
+import static android.text.TextUtils.replace;
+
 import mz.nedbank.ocr.model.IdentityDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +40,9 @@ public class MrzDataExtractor {
 
         // Clean and normalize the text
         String cleanText = preprocessMrzText(text);
+        for (int i = 0; i < 2; i++) {
+            cleanText = preprocessMrzText(cleanText);
+        }
         System.out.println("DEBUG: After preprocessing: '" + cleanText + "'");
         logger.debug("Processing MRZ text of {} characters", cleanText.length());
 
@@ -99,6 +104,8 @@ public class MrzDataExtractor {
 
         // Replace common OCR errors but be more conservative
         text = text.replaceAll("[^A-Z0-9<\\n\\s]", "<");
+        text = text.replaceAll("M02|M0Z|MO2|M07|MO7", "MOZ");
+        text = text.replaceAll("<K<|<L<", "<<");
 
         return text.trim();
     }
@@ -109,11 +116,18 @@ public class MrzDataExtractor {
     private String[] extractMrzLines(String text) {
         List<String> mrzLines = new ArrayList<>();
         String[] lines = text.split("\n");
-
+        int line1length=lines[0].length();
         System.out.println("DEBUG: Processing " + lines.length + " lines from text");
         for (int i = 0; i < lines.length; i++) {
             String line = lines[i].trim();
             System.out.println("DEBUG: Line " + (i+1) + " length=" + line.length() + " content='" + line + "'");
+            //Trim line to match length of first line, since extraction of first line is more accurate
+            if(line.length()<line1length){
+                while(line.length()<line1length){line=line+"<";}
+            } else if (line.length()>line1length) {
+                while(line.length()>line1length){line=line.substring(0, line.length() - 1);}
+            }
+
             // MRZ lines should be 30, 36, or 44 characters long
             if (line.length() == 30 || line.length() == 36 || line.length() == 44) {
                 // Check if line contains mostly valid MRZ characters
@@ -218,6 +232,16 @@ public class MrzDataExtractor {
         if (line2.length() >= 44) {
             // Document number (positions 1-9)
             document.setDocumentNumber(line2.substring(0, 9).replace("<", ""));
+            String aux= document.getDocumentNumber();
+            String prefix= aux.substring(0,document.getDocumentNumber().length()-1);
+            char auxchar=aux.charAt(document.getDocumentNumber().length()-1);
+            switch (auxchar) {
+                case '5':
+                    aux = prefix + 'S';
+                    System.out.println(aux);
+                    break;
+            }
+            document.setDocumentNumber(aux);
 
             // Nationality (positions 11-13)
             document.setNationality(line2.substring(10, 13));
@@ -269,6 +293,20 @@ public class MrzDataExtractor {
 
             // Document number (positions 6-14)
             document.setDocumentNumber(line1.substring(15, 28).replace("<", ""));
+            String aux= document.getDocumentNumber();
+            String prefix= aux.substring(0,document.getDocumentNumber().length()-1);
+            char auxchar=aux.charAt(document.getDocumentNumber().length()-1);
+            switch (auxchar) {
+                case '5':
+                    aux = prefix + 'S';
+                    System.out.println(aux);
+                    break;
+                case '8':
+                    aux = prefix + 'S';
+                    System.out.println(aux);
+                    break;
+            }
+            document.setDocumentNumber(aux);
         }
 
         // Parse line 2
@@ -385,7 +423,7 @@ public class MrzDataExtractor {
             int day = Integer.parseInt(dateStr.substring(4, 6));
 
             // Handle 2-digit year (assume 1900-2099 range)
-            if (year < 50) {
+            if (year < 40) {
                 year += 2000; // 00-49 -> 2000-2049
             } else {
                 year += 1900; // 50-99 -> 1950-1999

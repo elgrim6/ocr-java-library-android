@@ -25,7 +25,16 @@ public class ImagePreprocessor {
         }
     }
 
-    private static final int TARGET_HEIGHT = 400; // Increased target height for better resolution
+    //650 best result so far
+    //879 & 898 around the same
+    //667 best result pt2
+
+    //v2
+    //660 best so far
+    //669 best
+    //682 PERFECT on test with id card 10 sample
+
+    private static final int TARGET_HEIGHT =550; // Increased target height for better resolution
 
     /**
      * Enhanced preprocessing with multiple strategies and fallback options.
@@ -59,21 +68,56 @@ public class ImagePreprocessor {
         Mat claheResult = new Mat();
         clahe.apply(denoised, claheResult);
 
+        // Step 4.5: Sharpen before thresholding to make < clearer
+        Imgproc.GaussianBlur(claheResult, claheResult, new Size(0, 0), 3);
+        Core.addWeighted(claheResult, 1.5, claheResult, -0.5, 0, claheResult);
+
         // Step 5: Deskew the image
         Mat deskewed = deskewImage(claheResult);
 
-        // Step 6: Apply adaptive thresholding with adjusted parameters
+// Step 6: Adaptive thresholding
         Mat binary = new Mat();
-        // Experimenting with blockSize and C value for better results
-        Imgproc.adaptiveThreshold(deskewed, binary, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 199, 25);
-
-        // Step 7: Apply morphological operations (optional, can be adjusted based on results)
-        Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(2, 2)); // Adjusted kernel size
-        Imgproc.morphologyEx(binary, binary, Imgproc.MORPH_CLOSE, kernel);
+        Imgproc.adaptiveThreshold(
+                deskewed,
+                binary,
+                255,
+                Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,
+                Imgproc.THRESH_BINARY,
+                199,
+                25
+        );
+        // Step 7: Morphological operations
+// Reduce kernel size so < doesn't get closed into a blob
+        Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(1, 1));
         Imgproc.morphologyEx(binary, binary, Imgproc.MORPH_OPEN, kernel);
 
-        File temp = File.createTempFile("ocr_processed_", ".png");
+        File temp = File.createTempFile("C:\\ocr_processed_", ".jpg");
         Imgcodecs.imwrite(temp.getAbsolutePath(), binary);
+
+        //debug (show preprocessed images)
+        /*
+        // Create output directory if it doesn't exist
+        File outputDir = new File( "C:\\ocr_processed\\");
+        if (!outputDir.exists()) {
+            outputDir.mkdirs();
+        }
+
+        // Create output file with timestamp to avoid conflicts
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        String inputName = input.getName();
+        String baseName = inputName.substring(0, inputName.lastIndexOf('.'));
+        String outputFileName =  "C:\\ocr_processed\\processed_" + baseName + "_" + timestamp + ".jpg";
+        File outputFile = new File(outputFileName);
+
+        // Save the processed image
+        boolean success = Imgcodecs.imwrite(outputFile.getAbsolutePath(), binary);
+        if (!success) {
+            throw new IOException("Failed to save processed image to: " + outputFile.getAbsolutePath());
+        }
+
+        System.out.println("Processed image saved to: " + outputFile.getAbsolutePath());
+*/
+
 
         // Release resources
         src.release();
