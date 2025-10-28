@@ -20,16 +20,30 @@ android {
         abortOnError false
     }
 }
-publishing {
-    publications {
-        release(MavenPublication) {
-            groupId = 'mz.nedbank'
-            artifactId = 'ocr'
-            version = '1.1.4'
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                groupId = 'mz.nedbank'
+                artifactId = 'ocr'
+                version = '1.1.5'
+
+                artifact bundleReleaseAar
+
+                pom.withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+                    configurations.releaseRuntimeClasspath.resolvedConfiguration.firstLevelModuleDependencies.each {
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', it.moduleGroup)
+                        dependencyNode.appendNode('artifactId', it.moduleName)
+                        dependencyNode.appendNode('version', it.moduleVersion)
+                    }
+                }
+            }
         }
     }
 }
-
 
 repositories {
     google()
@@ -43,4 +57,3 @@ dependencies {
     runtimeOnly 'org.slf4j:slf4j-simple:1.7.36'
     testImplementation 'junit:junit:4.13.2'
 }
-

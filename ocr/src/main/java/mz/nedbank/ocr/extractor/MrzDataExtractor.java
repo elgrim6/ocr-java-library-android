@@ -88,7 +88,8 @@ public class MrzDataExtractor {
         // Perform general validation
         validateDocument(document);
 
-        logger.info("Extracted identity document: {}", document.toString());
+        //Debug: logging
+        logger.info("Extracted identity document: {}", document);
         return document;
     }
 
@@ -492,10 +493,10 @@ public class MrzDataExtractor {
         logger.debug("Document validation completed. Valid: {}, Errors: {}",
                     document.isValid(), document.getValidationErrors());
     }
+/*
 
-    /**
-     * Calculate MRZ check digit (simplified implementation)
-     */
+    // Calculate MRZ check digit (simplified implementation)
+
     private int calculateCheckDigit(String data) {
         // This is a simplified implementation
         // The actual ICAO algorithm uses specific weights: 7, 3, 1, 7, 3, 1, ...
@@ -520,5 +521,5 @@ public class MrzDataExtractor {
         }
 
         return sum % 10;
-    }
+    }*/
 }

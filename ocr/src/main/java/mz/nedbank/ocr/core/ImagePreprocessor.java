@@ -9,8 +9,6 @@ import org.opencv.photo.Photo;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Enhanced image preprocessing utility for OCR with focus on MRZ extraction.
