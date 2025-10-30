@@ -15,11 +15,15 @@ import java.util.List;
  * from a document image. If detection fails, the original image is returned.
  */
 public class MrzImageCropper {
+    private static boolean openCVLoaded = false;
+
     static {
         try {
-            OpenCV.loadLocally();
+            System.loadLibrary("opencv_java4");
+            openCVLoaded = true;
         } catch (UnsatisfiedLinkError e) {
             System.err.println("OpenCV not available: " + e.getMessage());
+            openCVLoaded = false;
         }
     }
 
@@ -28,6 +32,10 @@ public class MrzImageCropper {
      * only the detected MRZ area. If cropping fails, the original file is returned.
      */
     public File crop(File input) throws IOException {
+        if (!openCVLoaded) {
+            throw new IOException("OpenCV library not loaded");
+        }
+
         Mat src = Imgcodecs.imread(input.getAbsolutePath());
         if (src.empty()) {
             throw new IOException("Unable to read input image: " + input.getAbsolutePath());
