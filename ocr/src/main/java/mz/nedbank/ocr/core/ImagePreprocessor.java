@@ -1,6 +1,6 @@
 package mz.nedbank.ocr.core;
 
-import nu.pattern.OpenCV;
+//import nu.pattern.OpenCV;
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
@@ -15,13 +15,18 @@ import java.io.IOException;
  * Implements multiple preprocessing strategies with fallback options.
  */
 public class ImagePreprocessor {
+    private static boolean openCVLoaded = false;
+
     static {
         try {
-            OpenCV.loadLocally();
+            System.loadLibrary("opencv_java4");
+            openCVLoaded = true;
         } catch (UnsatisfiedLinkError e) {
             System.err.println("OpenCV not available: " + e.getMessage());
+            openCVLoaded = false;
         }
     }
+
 
     //650 best result so far
     //879 & 898 around the same
@@ -39,6 +44,9 @@ public class ImagePreprocessor {
      * Returns the best processed image for OCR.
      */
     public File preprocess(File input) throws IOException {
+        if (!openCVLoaded) {
+            throw new IOException("OpenCV library not loaded");
+        }
         Mat src = Imgcodecs.imread(input.getAbsolutePath());
         if (src.empty()) {
             throw new IOException("Unable to read input image: " + input.getAbsolutePath());
