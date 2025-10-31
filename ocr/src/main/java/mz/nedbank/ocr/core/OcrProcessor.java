@@ -8,6 +8,8 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.io.IOException;
 
+import android.util.Log;
+
 
 import mz.nedbank.ocr.core.ImagePreprocessor;
 import mz.nedbank.ocr.core.MrzImageCropper;
@@ -19,6 +21,8 @@ import mz.nedbank.ocr.core.MrzImageCropper;
  * not available in this environment.
  */
 public class OcrProcessor {
+
+    private static final String TAG = "OCRProcessor";
 
     /** Result wrapper used by the examples. */
     public static class ProcessingResult<T> {
@@ -72,6 +76,7 @@ public class OcrProcessor {
                 cropped = cropper.crop(image);
             } catch (IOException e) {
                 System.err.println("MRZ cropping failed: " + e.getMessage());
+                Log.e(TAG, "MRZ cropping failed: " + e.getMessage());
             }
 
             // Preprocess image using OpenCV. If preprocessing fails, fall back to
@@ -82,6 +87,7 @@ public class OcrProcessor {
             } catch (IOException e) {
                 // Preprocessing is optional; log to stderr and continue
                 System.err.println("Preprocessing failed: " + e.getMessage());
+                Log.e(TAG,"Preprocessing failed: " + e.getMessage());
             }
 
             // Allow overriding the tesseract binary via environment variable
@@ -131,6 +137,7 @@ public class OcrProcessor {
         } catch (Exception e) {
             IdentityDocument doc = new IdentityDocument();
             doc.setValidationErrors(e.getMessage());
+            Log.e(TAG,"Processing failed: "+e.getMessage());
             return new ProcessingResult<>(doc, false, e.getMessage());
         }
     }

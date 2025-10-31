@@ -37,6 +37,7 @@ public class MrzDataExtractor {
             document.setValidationErrors("Empty or null input text");
             return document;
         }
+        Log.d(TAG, "OCR text accepted");
 
         IdentityDocument document = new IdentityDocument();
         document.setRawMrzText(text);
@@ -54,7 +55,7 @@ public class MrzDataExtractor {
         String[] mrzLines = extractMrzLines(cleanText);
         if (mrzLines.length == 0) {
             logger.warn("No valid MRZ lines found in text");
-            Log.d(TAG, "No valid MRZ lines found in text");
+            Log.v(TAG, "No valid MRZ lines found in text");
             document.setValidationErrors("No valid MRZ lines found");
             return document;
         }
@@ -141,6 +142,7 @@ public class MrzDataExtractor {
                 // Check if line contains mostly valid MRZ characters
                 if (isValidMrzLine(line)) {
                     System.out.println("DEBUG: Line " + (i+1) + " is valid MRZ line");
+                    Log.d(TAG,"DEBUG: Line " + (i+1) + " is valid MRZ line");
                     mrzLines.add(line);
                 } else {
                     System.out.println("DEBUG: Line " + (i+1) + " failed MRZ validation");
