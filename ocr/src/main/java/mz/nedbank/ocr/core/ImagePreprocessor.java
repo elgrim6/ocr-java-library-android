@@ -97,7 +97,7 @@ public class ImagePreprocessor {
         Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(1, 1));
         Imgproc.morphologyEx(binary, binary, Imgproc.MORPH_OPEN, kernel);
 
-        File temp = File.createTempFile("C:\\ocr_processed_", ".jpg");
+        File temp = File.createTempFile("ocr_processed_", ".jpg");
         Imgcodecs.imwrite(temp.getAbsolutePath(), binary);
 
         //debug (show preprocessed images)
