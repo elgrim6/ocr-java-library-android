@@ -101,7 +101,7 @@ public class ImagePreprocessor {
         Imgcodecs.imwrite(temp.getAbsolutePath(), binary);
 
         //debug (show preprocessed images)
-        /*
+
         // Create output directory if it doesn't exist
         File outputDir = new File( "C:\\ocr_processed\\");
         if (!outputDir.exists()) {
@@ -122,7 +122,7 @@ public class ImagePreprocessor {
         }
 
         System.out.println("Processed image saved to: " + outputFile.getAbsolutePath());
-*/
+
 
 
         // Release resources

@@ -5,6 +5,7 @@ import static android.text.TextUtils.replace;
 import mz.nedbank.ocr.model.IdentityDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import android.util.Log;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import java.util.List;
  */
 public class MrzDataExtractor {
     private static final Logger logger = LoggerFactory.getLogger(MrzDataExtractor.class);
+    private static final String TAG = "OCRLibrary";
 
     // Character used for padding/filling in MRZ
     private static final char FILLER_CHAR = '<';
@@ -30,6 +32,7 @@ public class MrzDataExtractor {
 
         if (text == null || text.trim().isEmpty()) {
             logger.warn("Empty or null OCR text provided");
+            Log.d(TAG, "Empty or null OCR text provided");
             IdentityDocument document = new IdentityDocument();
             document.setValidationErrors("Empty or null input text");
             return document;
@@ -45,11 +48,13 @@ public class MrzDataExtractor {
         }
         System.out.println("DEBUG: After preprocessing: '" + cleanText + "'");
         logger.debug("Processing MRZ text of {} characters", cleanText.length());
+        Log.d(TAG, "Processing MRZ text of "+ cleanText.length()+"characters");
 
         // Extract MRZ lines
         String[] mrzLines = extractMrzLines(cleanText);
         if (mrzLines.length == 0) {
             logger.warn("No valid MRZ lines found in text");
+            Log.d(TAG, "No valid MRZ lines found in text");
             document.setValidationErrors("No valid MRZ lines found");
             return document;
         }
@@ -73,11 +78,13 @@ public class MrzDataExtractor {
                     break;
                 default:
                     logger.warn("Unknown MRZ format detected");
+                    Log.v(TAG, "Unknown MRZ format detected");
                     document.setValidationErrors("Unknown MRZ format");
                     return document;
             }
         } catch (Exception e) {
             logger.error("Error extracting MRZ data", e);
+            Log.e(TAG,"Error extracting MRZ data: "+e);
             document.setValidationErrors("Error parsing MRZ data: " + e.getMessage());
             return document;
         }
@@ -196,6 +203,7 @@ public class MrzDataExtractor {
         }
 
         logger.warn("Could not determine MRZ format from {} lines", mrzLines.length);
+        Log.d(TAG,"Could not determine MRZ format from "+ mrzLines.length+" lines");
         return IdentityDocument.MrzFormat.TD3; // Default fallback
     }
 

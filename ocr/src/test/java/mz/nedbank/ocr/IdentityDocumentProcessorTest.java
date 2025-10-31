@@ -284,7 +284,7 @@ public class IdentityDocumentProcessorTest {
 
             // Process a id card image
             // Use a relative path so the example works across environment
-            File passportImage = new File("src/test/resources/sample_id_card_mrz14.png");
+            File passportImage = new File("src/test/resources/sample_id_card_mrz12.png");
 
             OcrProcessor.ProcessingResult<IdentityDocument> result =
                     processor.processIdentityDocument(passportImage);
