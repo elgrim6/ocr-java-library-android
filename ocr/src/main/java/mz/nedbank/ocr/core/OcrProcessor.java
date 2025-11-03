@@ -51,7 +51,7 @@ public class OcrProcessor {
 
     /** Create a processor using English OCR. */
     public OcrProcessor() {
-        this("mrz");
+        this("mrz+eng");
     }
 
     /** Create a processor with a custom tesseract language. */
