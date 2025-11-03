@@ -80,13 +80,20 @@ public class OcrProcessor {
 
         mTess = new TessBaseAPI();
         String dataPath = tessDataDir.getAbsolutePath();
-        String langPath = dataPath + File.separator + language;
 
         Log.d(TAG, "Initializing Tesseract with data path: " + dataPath);
 
+        // Try MRZ language first
         boolean success = mTess.init(dataPath, language);
+
+        // If MRZ fails, try English
+        if (!success && !language.equals("eng")) {
+            Log.w(TAG, "Failed to initialize Tesseract with language: " + language + ", trying English");
+            success = mTess.init(dataPath, "eng");
+        }
+
         if (!success) {
-            throw new IOException("Failed to initialize Tesseract with language: " + language);
+            throw new IOException("Failed to initialize Tesseract with any language");
         }
 
         Log.d(TAG, "Tesseract initialized successfully");
@@ -163,7 +170,11 @@ public class OcrProcessor {
      */
     public void release() {
         if (mTess != null) {
-            mTess.end();
+            try {
+                mTess.end();
+            } catch (Exception e) {
+                Log.w(TAG, "Error releasing Tesseract: " + e.getMessage());
+            }
             mTess = null;
         }
     }
