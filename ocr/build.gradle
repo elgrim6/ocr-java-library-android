@@ -56,4 +56,5 @@ dependencies {
     implementation 'org.slf4j:slf4j-api:1.7.36'
     runtimeOnly 'org.slf4j:slf4j-simple:1.7.36'
     testImplementation 'junit:junit:4.13.2'
+    implementation 'com.rmtheis:tess-two:9.1.0'
 }

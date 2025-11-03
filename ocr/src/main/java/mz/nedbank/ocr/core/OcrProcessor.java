@@ -2,27 +2,22 @@ package mz.nedbank.ocr.core;
 
 import mz.nedbank.ocr.extractor.MrzDataExtractor;
 import mz.nedbank.ocr.model.IdentityDocument;
+import com.googlecode.tesseract.android.TessBaseAPI;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.io.IOException;
 
 import android.util.Log;
 
-
-import mz.nedbank.ocr.core.ImagePreprocessor;
-import mz.nedbank.ocr.core.MrzImageCropper;
-
 /**
- * Simplified OCR processor that invokes the system tesseract command
+ * Android OCR processor that uses tess-two (Tesseract for Android)
  * to extract text from an image and then parses MRZ information.
- * This avoids heavy dependencies like OpenCV and tess4j which are
- * not available in this environment.
  */
 public class OcrProcessor {
 
     private static final String TAG = "OCRProcessor";
+    private TessBaseAPI mTess;
+    private File tessDataDir;
 
     /** Result wrapper used by the examples. */
     public static class ProcessingResult<T> {
@@ -65,11 +60,47 @@ public class OcrProcessor {
     }
 
     /**
-     * Process an identity document image using tesseract CLI and parse the
+     * Set the tesseract data directory (required for Android)
+     */
+    public void setTessDataDir(File dataDir) {
+        this.tessDataDir = dataDir;
+    }
+
+    /**
+     * Initialize Tesseract (must be called before processing)
+     */
+    private void initTesseract() throws IOException {
+        if (mTess != null) {
+            return; // Already initialized
+        }
+
+        if (tessDataDir == null) {
+            throw new IOException("Tesseract data directory not set. Call setTessDataDir() first.");
+        }
+
+        mTess = new TessBaseAPI();
+        String dataPath = tessDataDir.getAbsolutePath();
+        String langPath = dataPath + File.separator + language;
+
+        Log.d(TAG, "Initializing Tesseract with data path: " + dataPath);
+
+        boolean success = mTess.init(dataPath, language);
+        if (!success) {
+            throw new IOException("Failed to initialize Tesseract with language: " + language);
+        }
+
+        Log.d(TAG, "Tesseract initialized successfully");
+    }
+
+    /**
+     * Process an identity document image using Tesseract and parse the
      * resulting MRZ text.
      */
     public ProcessingResult<IdentityDocument> processIdentityDocument(File image) {
         try {
+            // Initialize Tesseract if not already done
+            initTesseract();
+
             // First crop the MRZ region if possible
             File cropped = image;
             try {
@@ -80,36 +111,20 @@ public class OcrProcessor {
             }
 
             // Preprocess image using OpenCV. If preprocessing fails, fall back to
-            // the cropped (or original) image. The processed file path can be inspected on Android.
+            // the cropped (or original) image.
             File processed = cropped;
             try {
                 processed = preprocessor.preprocess(cropped);
             } catch (IOException e) {
-                // Preprocessing is optional; log to stderr and continue
                 System.err.println("Preprocessing failed: " + e.getMessage());
-                Log.e(TAG,"Preprocessing failed: " + e.getMessage());
+                Log.e(TAG, "Preprocessing failed: " + e.getMessage());
             }
 
-            // Allow overriding the tesseract binary via environment variable
-            String tesseractCmd = System.getenv().getOrDefault("TESSERACT_PATH", "tesseract");
-
-            ProcessBuilder pb = new ProcessBuilder(
-                    tesseractCmd,
-
-                    processed.getAbsolutePath(),
-                    "stdout",
-                    "-l", language,
-                    "--oem", "1",
-                    "--psm", "6");
-            Process proc = pb.start();
-            StringBuilder sb = new StringBuilder();
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
-                String line;
-                while ((line = br.readLine()) != null) {
-                    sb.append(line).append("\n");
-                }
-            }
-            proc.waitFor();
+            // Run OCR using Tesseract
+            Log.d(TAG, "Running OCR on image: " + processed.getAbsolutePath());
+            mTess.setImage(processed);
+            String ocrText = mTess.getUTF8Text();
+            Log.d(TAG, "Raw OCR text: " + ocrText);
 
             // Remove temporary files
             if (!processed.equals(cropped)) {
@@ -119,26 +134,37 @@ public class OcrProcessor {
                 cropped.delete();
             }
 
-            // Basic cleanup of OCR output. Some engines may prepend or append
-            // stray characters which can prevent MRZ detection. We trim each
-            // line and limit its length to 44 characters which is the longest
-            // standard MRZ line length.
+            // OCR Cleanup - keep lines that look like MRZ (44+ chars)
             StringBuilder cleaned = new StringBuilder();
-            for (String l : sb.toString().split("\n")) {
-                l = l.trim();
-                if (l.length() > 44) {
-                    l = l.substring(l.length() - 44); // keep right-most chars
+            for (String line : ocrText.split("\n")) {
+                line = line.trim();
+                if (line.length() > 44) {
+                    line = line.substring(line.length() - 44); // keep right-most chars
                 }
-                cleaned.append(l).append("\n");
+                if (!line.isEmpty()) {
+                    cleaned.append(line).append("\n");
+                }
             }
+
+            Log.d(TAG, "Cleaned OCR text: " + cleaned.toString());
 
             IdentityDocument doc = extractor.extract(cleaned.toString());
             return new ProcessingResult<>(doc, true, null);
         } catch (Exception e) {
+            Log.e(TAG, "Processing failed: " + e.getMessage(), e);
             IdentityDocument doc = new IdentityDocument();
             doc.setValidationErrors(e.getMessage());
-            Log.e(TAG,"Processing failed: "+e.getMessage());
             return new ProcessingResult<>(doc, false, e.getMessage());
+        }
+    }
+
+    /**
+     * Release Tesseract resources
+     */
+    public void release() {
+        if (mTess != null) {
+            mTess.end();
+            mTess = null;
         }
     }
 }
