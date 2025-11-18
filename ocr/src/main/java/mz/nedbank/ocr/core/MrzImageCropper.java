@@ -78,7 +78,7 @@ public class MrzImageCropper {
         }
 
         Mat doc = new Mat(src, docRect);
-        File temp = File.createTempFile("ocr_doc_", ".png");
+        File temp = File.createTempFile("ocr_doc_", ".jpg");
         Imgcodecs.imwrite(temp.getAbsolutePath(), doc);
 
         src.release();
