@@ -7,6 +7,7 @@ import org.opencv.imgproc.Imgproc;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -93,52 +94,67 @@ public class MrzImageCropper {
         // Apply Gaussian blur to reduce noise
         Imgproc.GaussianBlur(gray, gray, new Size(5, 5), 0);
 
-        // Apply binary threshold to create a binary image
-        Mat binary = new Mat();
-        Imgproc.threshold(gray, binary, 127, 255, Imgproc.THRESH_BINARY);
+        // Use Canny edge detection to find edges
+        Mat edges = new Mat();
+        Imgproc.Canny(gray, edges, 50, 150);
 
-        // Dilate to fill small holes and connect broken edges
+        // Dilate edges to connect broken segments
         Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
-        Imgproc.dilate(binary, binary, kernel, new Point(-1, -1), 2);
+        Imgproc.dilate(edges, edges, kernel, new Point(-1, -1), 2);
 
         // Find contours
         List<MatOfPoint> contours = new ArrayList<>();
         Mat hierarchy = new Mat();
-        Imgproc.findContours(binary, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+        Imgproc.findContours(edges, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
-        // Find the largest contour that represents the document
-        double maxArea = 0;
-        Rect docRect = null;
-        for (MatOfPoint contour : contours) {
-            double area = Imgproc.contourArea(contour);
-            if (area > maxArea) {
-                maxArea = area;
-                Rect rect = Imgproc.boundingRect(contour);
-                // Filter out very small contours (likely noise)
-                if (area > (src.rows() * src.cols() * 0.1)) {
-                    docRect = rect;
-                }
+        // Sort contours by area (largest first)
+        contours.sort(new Comparator<MatOfPoint>() {
+            @Override
+            public int compare(MatOfPoint c1, MatOfPoint c2) {
+                double area1 = Imgproc.contourArea(c1);
+                double area2 = Imgproc.contourArea(c2);
+                return Double.compare(area2, area1);
             }
-        }
+        });
 
         gray.release();
-        binary.release();
+        edges.release();
         kernel.release();
         hierarchy.release();
 
-        if (docRect == null) {
-            return null;
+        // Filter and find document contour
+        double minArea = (src.rows() * src.cols()) * 0.15; // Document should be at least 15% of image
+        double maxArea = (src.rows() * src.cols()) * 0.99; // Document should be less than 99% of image
+
+        for (MatOfPoint contour : contours) {
+            double area = Imgproc.contourArea(contour);
+
+            // Skip contours that are too small or too large
+            if (area < minArea || area > maxArea) {
+                continue;
+            }
+
+            Rect rect = Imgproc.boundingRect(contour);
+
+            // Document should have reasonable aspect ratio (not too extreme)
+            double aspectRatio = (double) rect.width / rect.height;
+            if (aspectRatio < 0.5 || aspectRatio > 2.0) {
+                continue;
+            }
+
+            // Add a small margin around the detected document
+            int marginY = Math.max(1, (int) (src.rows() * 0.01));
+            int marginX = Math.max(1, (int) (src.cols() * 0.01));
+            int x1 = Math.max(0, rect.x - marginX);
+            int y1 = Math.max(0, rect.y - marginY);
+            int x2 = Math.min(src.cols(), rect.x + rect.width + marginX);
+            int y2 = Math.min(src.rows(), rect.y + rect.height + marginY);
+
+            return new Rect(x1, y1, x2 - x1, y2 - y1);
         }
 
-        // Add a small margin around the detected document
-        int marginY = (int) (src.rows() * 0.02);
-        int marginX = (int) (src.cols() * 0.02);
-        int x1 = Math.max(0, docRect.x - marginX);
-        int y1 = Math.max(0, docRect.y - marginY);
-        int x2 = Math.min(src.cols(), docRect.x + docRect.width + marginX);
-        int y2 = Math.min(src.rows(), docRect.y + docRect.height + marginY);
-
-        return new Rect(x1, y1, x2 - x1, y2 - y1);
+        // Fallback: if no suitable contour found, return null to use original image
+        return null;
     }
 
     private Rect detectMrz(Mat src) {
